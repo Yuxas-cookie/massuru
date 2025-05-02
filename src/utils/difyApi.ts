@@ -22,6 +22,13 @@ if (!DIFY_API_KEY.startsWith('app-')) {
   throw new Error('DIFY_API_KEYの形式が正しくありません');
 }
 
+// 環境変数の値をログに出力（デバッグ用）
+console.log('環境変数の設定:', {
+  DIFY_API_KEY: DIFY_API_KEY ? '設定されています' : '未設定',
+  DIFY_API_URL: DIFY_API_URL ? '設定されています' : '未設定',
+  API_KEY_PREFIX: DIFY_API_KEY?.substring(0, 4)
+});
+
 interface DifyMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -129,7 +136,12 @@ export const sendMessageToDify = async (
         statusText: error.response?.statusText,
         data: error.response?.data,
         headers: error.response?.headers,
-        message: errorMessage
+        message: errorMessage,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          headers: error.config?.headers
+        }
       };
       console.error('エラー詳細:', errorDetails);
       throw new Error(`AIとの通信中にエラーが発生しました: ${errorMessage}`);
