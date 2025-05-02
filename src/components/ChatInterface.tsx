@@ -7,7 +7,16 @@ import { generateUniqueId } from '../utils/helpers';
 import { sendMessageToDify } from '../utils/difyApi';
 
 export const ChatInterface: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>(() => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | undefined>();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // ページ読み込み時に初期メッセージを設定
+  useEffect(() => {
+    // ローカルストレージをクリア
+    localStorage.removeItem('chatMessages');
+    
     // 初期メッセージを設定
     const initialMessage: Message = {
       id: generateUniqueId(),
@@ -24,24 +33,13 @@ export const ChatInterface: React.FC = () => {
       timestamp: new Date(),
       type: 'text'
     };
-    return [initialMessage];
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // ページ読み込み時にメッセージのみを読み込む（会話IDはリセット）
-  useEffect(() => {
-    const savedMessages = localStorage.getItem('chatMessages');
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    }
-    // 会話IDはリセット
+    
+    setMessages([initialMessage]);
     setConversationId(undefined);
-    console.log('ページ読み込み: 会話IDをリセット');
+    console.log('ページ読み込み: チャットをリセット');
   }, []);
 
-  // メッセージのみをローカルストレージに保存
+  // メッセージをローカルストレージに保存（デバッグ用）
   useEffect(() => {
     localStorage.setItem('chatMessages', JSON.stringify(messages));
   }, [messages]);
