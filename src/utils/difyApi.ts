@@ -7,11 +7,19 @@ const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
 
 // 環境変数が設定されているか確認
 if (!DIFY_API_KEY) {
-  console.error('DIFY_API_KEYが設定されていません。環境変数を確認してください。');
+  console.error('❌ DIFY_API_KEYが設定されていません。環境変数を確認してください。');
+  throw new Error('DIFY_API_KEYが設定されていません');
 }
 
 if (!DIFY_API_URL) {
-  console.error('DIFY_API_URLが設定されていません。環境変数を確認してください。');
+  console.error('❌ DIFY_API_URLが設定されていません。環境変数を確認してください。');
+  throw new Error('DIFY_API_URLが設定されていません');
+}
+
+// APIキーの形式を確認
+if (!DIFY_API_KEY.startsWith('app-')) {
+  console.error('❌ DIFY_API_KEYの形式が正しくありません。app-で始まる必要があります。');
+  throw new Error('DIFY_API_KEYの形式が正しくありません');
 }
 
 interface DifyMessage {
@@ -115,12 +123,16 @@ export const sendMessageToDify = async (
   } catch (error) {
     console.error('❌ Dify APIエラー:', error);
     if (axios.isAxiosError(error)) {
-      console.error('エラー詳細:', {
+      const errorMessage = error.response?.data?.message || error.message;
+      const errorDetails = {
         status: error.response?.status,
         statusText: error.response?.statusText,
         data: error.response?.data,
-        headers: error.response?.headers
-      });
+        headers: error.response?.headers,
+        message: errorMessage
+      };
+      console.error('エラー詳細:', errorDetails);
+      throw new Error(`AIとの通信中にエラーが発生しました: ${errorMessage}`);
     }
     throw new Error('AIとの通信中にエラーが発生しました');
   }
