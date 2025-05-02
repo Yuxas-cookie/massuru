@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { Message } from '../types';
-import { v4 as uuidv4 } from 'uuid';
 
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
@@ -28,18 +27,14 @@ export const sendMessageToDify = async (
     })) || [];
 
     // リクエストデータの準備
-    const requestData: any = {
+    const requestData = {
       inputs: {},
       query: message,
+      conversation_id: conversationId,
       response_mode: 'streaming',
       user: 'user-123',
       messages: history
     };
-
-    // 会話IDが存在する場合のみ追加
-    if (conversationId) {
-      requestData.conversation_id = conversationId;
-    }
 
     console.log('📤 Difyへのリクエスト:', {
       url: `${DIFY_API_URL}/chat-messages`,
@@ -93,6 +88,11 @@ export const sendMessageToDify = async (
           console.error('JSONパースエラー:', e);
         }
       }
+    }
+
+    // 会話IDが存在しない場合は、新しい会話として扱う
+    if (!conversation_id) {
+      console.warn('会話IDが取得できませんでした。新しい会話として扱います。');
     }
 
     return {
