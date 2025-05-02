@@ -8,7 +8,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  base: '/Muscle-Coach-AI/',
+  base: '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
