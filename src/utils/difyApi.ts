@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Message } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
@@ -26,11 +27,14 @@ export const sendMessageToDify = async (
       content: msg.content
     })) || [];
 
+    // 会話IDが存在しない場合は新しいUUIDを生成
+    const validConversationId = conversationId || uuidv4();
+
     // リクエストデータの準備
     const requestData = {
       inputs: {},
       query: message,
-      conversation_id: conversationId,
+      conversation_id: validConversationId,
       response_mode: 'streaming',
       user: 'user-123',
       messages: history
@@ -66,7 +70,7 @@ export const sendMessageToDify = async (
     });
 
     // レスポンスデータを解析して会話IDを取得
-    let conversation_id = conversationId; // 既存の会話IDを保持
+    let conversation_id = validConversationId; // 既存の会話IDを保持
     const lines = response.data.split('\n');
     let content = '';
     
@@ -90,17 +94,12 @@ export const sendMessageToDify = async (
       }
     }
 
-    // 会話IDが存在しない場合は、新しい会話として扱う
-    if (!conversation_id) {
-      console.warn('会話IDが取得できませんでした。新しい会話として扱います。');
-    }
-
     return {
       message: {
         role: 'assistant',
         content: content
       },
-      conversation_id: conversation_id || ''
+      conversation_id: conversation_id
     };
   } catch (error) {
     console.error('❌ Dify APIエラー:', error);
