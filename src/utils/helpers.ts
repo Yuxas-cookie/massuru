@@ -1,5 +1,7 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export const generateUniqueId = (): string => {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+  return uuidv4();
 };
 
 export const formatTime = (date: Date): string => {
