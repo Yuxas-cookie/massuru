@@ -27,18 +27,19 @@ export const sendMessageToDify = async (
       content: msg.content
     })) || [];
 
-    // 会話IDが存在しない場合は新しいUUIDを生成
-    const validConversationId = conversationId || uuidv4();
-
     // リクエストデータの準備
-    const requestData = {
+    const requestData: any = {
       inputs: {},
       query: message,
-      conversation_id: validConversationId,
       response_mode: 'streaming',
       user: 'user-123',
       messages: history
     };
+
+    // 会話IDが存在する場合のみ追加
+    if (conversationId) {
+      requestData.conversation_id = conversationId;
+    }
 
     console.log('📤 Difyへのリクエスト:', {
       url: `${DIFY_API_URL}/chat-messages`,
@@ -70,7 +71,7 @@ export const sendMessageToDify = async (
     });
 
     // レスポンスデータを解析して会話IDを取得
-    let conversation_id = validConversationId; // 既存の会話IDを保持
+    let conversation_id = conversationId; // 既存の会話IDを保持
     const lines = response.data.split('\n');
     let content = '';
     
@@ -99,7 +100,7 @@ export const sendMessageToDify = async (
         role: 'assistant',
         content: content
       },
-      conversation_id: conversation_id
+      conversation_id: conversation_id || ''
     };
   } catch (error) {
     console.error('❌ Dify APIエラー:', error);
