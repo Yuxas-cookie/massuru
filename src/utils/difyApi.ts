@@ -1,8 +1,18 @@
 import axios from 'axios';
 import { Message } from '../types';
 
+// 環境変数からAPIキーとURLを取得
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
+
+// 環境変数が設定されているか確認
+if (!DIFY_API_KEY) {
+  console.error('DIFY_API_KEYが設定されていません。環境変数を確認してください。');
+}
+
+if (!DIFY_API_URL) {
+  console.error('DIFY_API_URLが設定されていません。環境変数を確認してください。');
+}
 
 interface DifyMessage {
   role: 'user' | 'assistant';
