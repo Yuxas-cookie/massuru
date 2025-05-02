@@ -1,33 +1,8 @@
 import axios from 'axios';
 import { Message } from '../types';
 
-// 環境変数からAPIキーとURLを取得
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
-
-// 環境変数が設定されているか確認
-if (!DIFY_API_KEY) {
-  console.error('❌ DIFY_API_KEYが設定されていません。環境変数を確認してください。');
-  throw new Error('DIFY_API_KEYが設定されていません');
-}
-
-if (!DIFY_API_URL) {
-  console.error('❌ DIFY_API_URLが設定されていません。環境変数を確認してください。');
-  throw new Error('DIFY_API_URLが設定されていません');
-}
-
-// APIキーの形式を確認
-if (!DIFY_API_KEY.startsWith('app-')) {
-  console.error('❌ DIFY_API_KEYの形式が正しくありません。app-で始まる必要があります。');
-  throw new Error('DIFY_API_KEYの形式が正しくありません');
-}
-
-// 環境変数の値をログに出力（デバッグ用）
-console.log('環境変数の設定:', {
-  DIFY_API_KEY: DIFY_API_KEY ? '設定されています' : '未設定',
-  DIFY_API_URL: DIFY_API_URL ? '設定されています' : '未設定',
-  API_KEY_PREFIX: DIFY_API_KEY?.substring(0, 4)
-});
 
 interface DifyMessage {
   role: 'user' | 'assistant';
@@ -130,21 +105,12 @@ export const sendMessageToDify = async (
   } catch (error) {
     console.error('❌ Dify APIエラー:', error);
     if (axios.isAxiosError(error)) {
-      const errorMessage = error.response?.data?.message || error.message;
-      const errorDetails = {
+      console.error('エラー詳細:', {
         status: error.response?.status,
         statusText: error.response?.statusText,
         data: error.response?.data,
-        headers: error.response?.headers,
-        message: errorMessage,
-        config: {
-          url: error.config?.url,
-          method: error.config?.method,
-          headers: error.config?.headers
-        }
-      };
-      console.error('エラー詳細:', errorDetails);
-      throw new Error(`AIとの通信中にエラーが発生しました: ${errorMessage}`);
+        headers: error.response?.headers
+      });
     }
     throw new Error('AIとの通信中にエラーが発生しました');
   }
